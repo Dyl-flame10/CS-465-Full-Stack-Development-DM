@@ -4,9 +4,12 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+// define routers
 var indexRouter = require('./app_server/routes/index');
 var usersRouter = require('./app_server/routes/users');
 var travelRouter = require('./app_server/routes/travel');
+var apiRouter = require('./app_api/routes/index');
+
 var handlebars = require('hbs');
 
 var app = express();
@@ -18,14 +21,22 @@ app.set('view engine', 'hbs');
 // register handlebars partials
 handlebars.registerPartials(__dirname + '/app_server/views/partials');
 
+// Bring in db
+require('./app_api/models/db');
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// routes to controllers
 app.use('/travel', travelRouter);
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/api', apiRouter);
+
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
