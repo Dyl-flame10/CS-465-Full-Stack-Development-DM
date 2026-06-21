@@ -1,23 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators , ReactiveFormsModule} from '@angular/forms';
-import { Router } from "@angular/router";
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TripData } from '../services/trip-data';
+
 @Component({
   selector: 'app-add-trip',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './add-trip.html',
-  styleUrl: './add-trip.css'
+  styleUrl: './add-trip.css',
 })
-export class AddTrip implements OnInit {
+
+export class AddTrip implements OnInit{
   public addForm!: FormGroup;
   submitted = false;
-  constructor(
-    private formBuilder: FormBuilder,
-    private router: Router,
-    private tripService: TripData
-  ) { }
+
+  constructor(private formBuilder: FormBuilder, private tripData: TripData, private router: Router) {}
+
   ngOnInit() {
     this.addForm = this.formBuilder.group({
       _id: [],
@@ -28,22 +28,21 @@ export class AddTrip implements OnInit {
       resort: ['', Validators.required],
       perPerson: ['', Validators.required],
       image: ['', Validators.required],
-      description: ['', Validators.required],
-    })
+      description: ['', Validators.required]
+    });
   }
+
   public onSubmit() {
     this.submitted = true;
     if (this.addForm.valid) {
-      this.tripService.addTrip(this.addForm.value)
-        .subscribe({
-          next: (data: any) => {
-            console.log(data);
-            this.router.navigate(['']);
-          },
-          error: (error: any) => {
-            console.log('Error: ' + error);
-          }
-        });
+      this.tripData.addTrip(this.addForm.value).subscribe({
+        next: (data: any) => {
+          console.log(data);
+          this.router.navigate(['']);
+        },
+        error: (error: any) => {
+          console.log('Error: ' + error);
+        }});
     }
   }
   // get the form short name to access the form fields
