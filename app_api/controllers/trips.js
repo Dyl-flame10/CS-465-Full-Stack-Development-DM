@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 const Trip = require('../models/travlr'); // Register model
 const Model = mongoose.model('Trip');
+const ApiError = require('../errors/ApiError');
 
 // GET: /trips - list all the trips
-// Reguadrdless of outcome, response must include HTML status code
+// Reguardless of outcome, response must include HTML status code
 // and JSON message to the requesting client
 const tripsList = async (req, res) => {
 
@@ -13,16 +14,16 @@ const tripsList = async (req, res) => {
         // on the console
         console.log(q);
 
-    if (!q) 
+    if (!q)
     { // Database returned no data
-        return res .status(404).json({ message: 'Trips not found' });
+        throw ApiError.notFound('Trips not found');
     } else { // Return resulting trip list
         return res.status(200).json(q);
     }
 };
 
 // GET: /trips/:tripCode - lists a single trip
-// Reguadrdless of outcome, response must include HTML status code
+// Reguardless of outcome, response must include HTML status code
 // and JSON message to the requesting client
 const tripsFindByCode = async (req, res) => {
     const q = await Model.findOne({ 'code' : req.params.tripCode }).exec();
@@ -31,16 +32,16 @@ const tripsFindByCode = async (req, res) => {
         // on the console
         console.log(q);
 
-    if (!q) 
+    if (!q)
     { // Database returned no data
-        return res.status(404).json({ message: 'Trip not found' });
+        throw ApiError.notFound('Trip not found');
     } else { // Return resulting trip list
         return res.status(200).json(q);
     }
 };
 
 //  POST: /trips - adds a new trip to the database
-// Reguadrdless of outcome, response must include HTML status code  
+// Reguardless of outcome, response must include HTML status code  
 // and JSON message to the requesting client
 const tripsAddTrips = async (req, res) => {
     const newTrip = new Trip({
@@ -58,18 +59,14 @@ const tripsAddTrips = async (req, res) => {
 
     if (!q)
     { // Database returned no data
-        return res.status(400).json({ message: 'Error creating trip' });
+        throw ApiError.badRequest('Error creating trip');
     } else { // Return resulting trip list
         return res.status(201).json(q);
     }
-
-    // Uncomment the following line to show results of operation
-    // on the console
-    console.log(q)
 };
 
 // PUT: /trips/:tripsCode - Adds a new Trip
-// Reguadrdless of outcome, response must include HTML status code  
+// Reguardless of outcome, response must include HTML status code  
 // and JSON message to the requesting client
 const tripsUpdateTrip = async (req, res) => {
 
@@ -87,7 +84,7 @@ const tripsUpdateTrip = async (req, res) => {
             resort: req.body.resort,
             perPerson: req.body.perPerson,
             image: req.body.image,
-            description: req.body.description 
+            description: req.body.description
         },
         { new: true }
     )
@@ -95,14 +92,10 @@ const tripsUpdateTrip = async (req, res) => {
 
     if (!q)
     { // Database returned no data
-        return res.status(400).json({ message: 'Trip not found' });
+        throw ApiError.notFound('Trip not found');
     } else { // Return resulting updated trip
         return res.status(201).json(q);
     }
-
-    // Uncomment the following line to show results of operation
-    // on the console
-    console.log(q)
 };
 
 module.exports = {

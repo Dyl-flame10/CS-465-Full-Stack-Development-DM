@@ -84,9 +84,9 @@
         <div class="form-group">
             <label>Description:</label>
             <input type="text" formControlName="description" placeholder="Description" class="form-control"
-                [ngClass]="{ 'is-invalid': submitted && f['image'].errors }">
-            <div *ngIf="submitted && f['image'].errors">
-                <div *ngIf="f['image'].errors?.['required']">
+                [ngClass]="{ 'is-invalid': submitted && f['description'].errors }">
+            <div *ngIf="submitted && f['description'].errors">
+                <div *ngIf="f['description'].errors?.['required']">
                     Trip Description is required.
                 </div>
             </div>

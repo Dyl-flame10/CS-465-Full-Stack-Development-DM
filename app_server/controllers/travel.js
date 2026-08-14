@@ -22,7 +22,7 @@ const options =  {
 
 /* GET travel view */
 const travel = async function (req, res, next) {
-  await fetch(tripsEndpoint, options)
+  await fetch(TripsEndpoint, options)
     .then((res) => res.json())
     .then((json) => {
       let message = null;

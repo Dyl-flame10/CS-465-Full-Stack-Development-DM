@@ -17,6 +17,7 @@ export class EditTrip implements OnInit {
   trip!: Trip;
   submitted = false;
   message: string = '';
+  formError: string = '';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -82,6 +83,7 @@ export class EditTrip implements OnInit {
 
   public onSubmit(): void {
     this.submitted = true;
+    this.formError = '';
 
     if (this.editForm.valid) {
       this.tripDataService.updateTrip(this.editForm.value).subscribe({
@@ -91,6 +93,13 @@ export class EditTrip implements OnInit {
         },
         error: (error: any) => {
           console.log('Error: ' + error);
+
+          if (error.status === 401) {
+            this.formError = 'Your session has expired. Please log in again.';
+            this.router.navigate(['/login']);
+          } else {
+            this.formError = error?.error?.message || 'Failed to update trip. Please try again.';
+          }
         }
       });
     }

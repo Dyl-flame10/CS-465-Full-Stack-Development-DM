@@ -4,14 +4,17 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-require('dotenv').config();
+require('dotenv').config(); // JWT Config
 
+// Wire-up all individual page routers, wire API router, and render handlebars view
 var indexRouter = require('./app_server/routes/index');
 var usersRouter = require('./app_server/routes/users');
 var travelRouter = require('./app_server/routes/travel');
 var roomsRouter = require('./app_server/routes/rooms');
 var mealsRouter = require('./app_server/routes/meals');
 var apiRouter = require('./app_api/routes/index');
+var apiErrorHandler = require('./app_api/middleware/errorHandler');
+var ApiError = require('./app_api/errors/ApiError');
 var handlebars = require('hbs');
 
 // Bring in the database 
@@ -54,14 +57,15 @@ app.use('/rooms', roomsRouter);
 app.use('/meals', mealsRouter);
 app.use('/api', apiRouter);
 
-// Catch unauthorized error and create 401
-app.use((err, req, res, next) => {
-    if (err.name === 'UnauthorizedError') {
-        res
-          .status(401)
-          .json({ "message": err.name + ": " + err.message });
-    }
+// Any /api request that fell through without matching a route is a 404 —
+// forward it as an ApiError so it gets a JSON response, not the HTML page.
+app.use('/api', (req, res, next) => {
+  next(ApiError.notFound('API route not found'));
 });
+
+// All /api errors are formatted as JSON here, before the page-rendering
+// handlers below ever see them.
+app.use('/api', apiErrorHandler);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

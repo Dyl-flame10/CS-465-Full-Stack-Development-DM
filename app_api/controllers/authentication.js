@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 const User = require('../models/user');
 const passport = require('passport');
+const ApiError = require('../errors/ApiError');
 
 const register = async(req, res) => {
     // Validate message to insure that all parameters are present
     if (!req.body.name || !req.body.email || !req.body.password) {
-        return res.status(400).json({"message": "All fields required"});
+        throw ApiError.badRequest('All fields required');
     }
 
     const user = new User(
@@ -15,38 +16,32 @@ const register = async(req, res) => {
             password: ''             // Start with empty password
         });
     user.setPassword(req.body.password)  // Set user password
-    const q = await user.save();
+    await user.save();
 
-    if(!q)
-    {
-        // Database returned no data
-        return res.status(400).json(err);
-    } else {
-        // Return new user token
-        const token = user.generateJWT();
-        return res.status(200).json(token);
-    }
+    // Return new user token
+    const token = user.generateJWT();
+    return res.status(200).json({ token });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
     // Validate message to ensure that email and password are present
     if (!req.body.email || !req.body.password) {
-        return res.status(400).json({"message": "All fields required"});
+        return next(ApiError.badRequest('All fields required'));
     }
 
     // Delegate authenication to passport module
-    passport.authenticate('local', (err, user,info) => {
+    passport.authenticate('local', (err, user, info) => {
         if (err) {
             // Error in Authentication Process
-            return res.status(404).json(err);
+            return next(err);
         }
         if (user) { // Auth succeeded, generating JWT
             const token = user.generateJWT();
-            res.status(200).json({token});
+            return res.status(200).json({ token });
         } else { // Auth failed return error
-            res.status(401).json(info);
+            return next(ApiError.unauthorized(info && info.message ? info.message : 'Invalid credentials'));
         }
-    }) (req, res);
+    })(req, res, next);
 };
 
 // Export methods that drive endpoints
